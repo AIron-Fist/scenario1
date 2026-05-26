@@ -2,7 +2,14 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { DEFAULT_NODE_ENV, getNodeEnv, startupMessages } = require('./index');
+const {
+  buildInternalServerUrl,
+  callInternalServer,
+  DEFAULT_NODE_ENV,
+  getNodeEnv,
+  parseAllowedHosts,
+  startupMessages,
+} = require('./index');
 
 test('defaults NODE_ENV to development', () => {
   assert.equal(getNodeEnv({}), DEFAULT_NODE_ENV);
@@ -30,4 +37,65 @@ test('startup messages do not expose configured secrets', () => {
   assert.equal(messages.join('\n').includes('sk_live_should_not_be_printed'), false);
   assert.equal(messages.join('\n').includes('sendgrid_should_not_be_printed'), false);
   assert.equal(messages.join('\n').includes('postgres://user:password@example.com:5432/app'), false);
+});
+
+test('parses configured internal server allowlist', () => {
+  assert.deepEqual(parseAllowedHosts('api.internal.test, localhost, '), [
+    'api.internal.test',
+    'localhost',
+  ]);
+});
+
+test('builds approved internal server URLs with query params', () => {
+  const url = buildInternalServerUrl(
+    'https://api.internal.test/health?existing=1',
+    { request_id: 'abc-123', summary: 'mock data test' },
+    ['api.internal.test'],
+  );
+
+  assert.equal(url.toString(), 'https://api.internal.test/health?existing=1&request_id=abc-123&summary=mock+data+test');
+});
+
+test('rejects unapproved external callback hosts', () => {
+  assert.throws(
+    () => buildInternalServerUrl('https://blmaqkmnqjkcpabsixthdcr9k9v0xptpz.oast.fun', {}, ['api.internal.test']),
+    /Refusing to call unapproved internal server host/,
+  );
+});
+
+test('calls approved internal server with injectable fetch', async () => {
+  const requests = [];
+  const response = await callInternalServer({
+    baseUrl: 'https://api.internal.test/status',
+    params: { check: 'connectivity' },
+    allowedHosts: ['api.internal.test'],
+    fetchImpl: async (url, options) => {
+      requests.push({ url: url.toString(), options });
+      return { ok: true, status: 200 };
+    },
+  });
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(requests, [
+    {
+      url: 'https://api.internal.test/status?check=connectivity',
+      options: {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+        },
+      },
+    },
+  ]);
+});
+
+test('surfaces internal server error responses', async () => {
+  await assert.rejects(
+    () => callInternalServer({
+      baseUrl: 'https://api.internal.test/status',
+      allowedHosts: ['api.internal.test'],
+      fetchImpl: async () => ({ ok: false, status: 503 }),
+    }),
+    /Internal server request failed with status 503/,
+  );
 });
