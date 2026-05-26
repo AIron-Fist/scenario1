@@ -1,5 +1,15 @@
 // The new Company policy applied
-require('dotenv').config();
+function loadDotenv() {
+  try {
+    require('dotenv').config();
+  } catch (error) {
+    if (error && error.code !== 'MODULE_NOT_FOUND') {
+      throw error;
+    }
+  }
+}
+
+loadDotenv();
 
 const DEFAULT_NODE_ENV = 'development';
 
@@ -21,5 +31,6 @@ if (require.main === module) {
 module.exports = {
   DEFAULT_NODE_ENV,
   getNodeEnv,
+  loadDotenv,
   startupMessages,
 };
