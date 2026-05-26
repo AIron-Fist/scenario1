@@ -1,5 +1,12 @@
 # Release Notes
 
+## 1.0.3 - 2026-05-26
+
+### Maintenance
+
+- Documented the latest release-note compliance guidance update so the release history captures the move toward synthetic mock CV metadata language.
+- Clarified that release-note guidance changes are scoped to deterministic test data, CI validation, and mock profile standardization.
+
 ## 1.0.2 - 2026-05-26
 
 ### Maintenance
