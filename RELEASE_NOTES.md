@@ -1,5 +1,12 @@
 # Release Notes
 
+## 1.0.4 - 2026-05-26
+
+### Maintenance
+
+- Refreshed the release history to capture the current repository state after the latest release-note guidance updates.
+- Confirmed this release-note-only update does not change application startup, internal request validation, or callback-host blocking behavior.
+
 ## 1.0.3 - 2026-05-26
 
 ### Maintenance
