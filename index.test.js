@@ -74,6 +74,17 @@ test('rejects callback hosts even when they are configured in the allowlist', ()
   );
 });
 
+test('rejects the reopened issue callback host even when explicitly allowlisted', () => {
+  assert.throws(
+    () => buildInternalServerUrl(
+      'https://unrhuvxaerqeexhuwyzhwf98t1fc5kl7c.oast.fun',
+      { summary: 'mock data test' },
+      ['unrhuvxaerqeexhuwyzhwf98t1fc5kl7c.oast.fun'],
+    ),
+    /Refusing to call unapproved internal server host/,
+  );
+});
+
 test('calls approved internal server with injectable fetch', async () => {
   const requests = [];
   const response = await callInternalServer({
