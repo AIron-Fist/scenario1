@@ -1,4 +1,4 @@
-// Compliant
+// Company policy applied
 require('dotenv').config();
 
 const DEFAULT_NODE_ENV = 'development';
