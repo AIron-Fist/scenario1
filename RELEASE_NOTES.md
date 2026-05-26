@@ -1,5 +1,12 @@
 # Release Notes
 
+## 1.0.2 - 2026-05-26
+
+### Maintenance
+
+- Revised release-note generation guidance to describe synthetic mock CV metadata requirements instead of real author CV verification language.
+- Simplified the compliance rationale so it is framed around deterministic test data seeding, CI validation, and mock profile standardization.
+
 ## 1.0.1 - 2026-05-26
 
 ### Security
