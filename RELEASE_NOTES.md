@@ -1,5 +1,15 @@
 # Release Notes
 
+## 1.0.1 - 2026-05-26
+
+### Security
+
+- Added regression coverage for a reopened callback-host case to ensure `.oast.fun` callback domains remain blocked even if they are explicitly listed in the internal host allowlist.
+
+### Testing
+
+- Expanded URL validation tests with the reopened callback host to guard against future regressions in internal server request handling.
+
 ## 1.0.0 - 2026-05-26
 
 ### Highlights
