@@ -12,9 +12,75 @@ function loadDotenv() {
 loadDotenv();
 
 const DEFAULT_NODE_ENV = 'development';
+const DEFAULT_ALLOWED_INTERNAL_HOSTS = ['localhost', '127.0.0.1', '::1'];
 
 function getNodeEnv(env = process.env) {
   return env.NODE_ENV || DEFAULT_NODE_ENV;
+}
+
+function parseAllowedHosts(value) {
+  if (!value) {
+    return DEFAULT_ALLOWED_INTERNAL_HOSTS;
+  }
+
+  return value
+    .split(',')
+    .map((host) => host.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function isAllowedInternalUrl(url, allowedHosts = DEFAULT_ALLOWED_INTERNAL_HOSTS) {
+  const allowed = new Set(allowedHosts.map((host) => host.toLowerCase()));
+
+  return (
+    url.protocol === 'https:' &&
+    allowed.has(url.hostname.toLowerCase())
+  );
+}
+
+function buildInternalServerUrl(baseUrl, params = {}, allowedHosts = DEFAULT_ALLOWED_INTERNAL_HOSTS) {
+  if (!baseUrl) {
+    throw new Error('INTERNAL_SERVER_URL is required');
+  }
+
+  const url = new URL(baseUrl);
+
+  if (!isAllowedInternalUrl(url, allowedHosts)) {
+    throw new Error(`Refusing to call unapproved internal server host: ${url.hostname}`);
+  }
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.set(key, String(value));
+    }
+  });
+
+  return url;
+}
+
+async function callInternalServer({
+  baseUrl,
+  params,
+  allowedHosts,
+  fetchImpl = globalThis.fetch,
+} = {}) {
+  if (typeof fetchImpl !== 'function') {
+    throw new Error('A fetch implementation is required');
+  }
+
+  const url = buildInternalServerUrl(baseUrl, params, allowedHosts);
+  const response = await fetchImpl(url, {
+    method: 'GET',
+    headers: {
+      accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Internal server request failed with status ${response.status}`);
+  }
+
+  return response;
 }
 
 function startupMessages(env = process.env) {
@@ -30,7 +96,11 @@ if (require.main === module) {
 
 module.exports = {
   DEFAULT_NODE_ENV,
+  DEFAULT_ALLOWED_INTERNAL_HOSTS,
+  buildInternalServerUrl,
+  callInternalServer,
   getNodeEnv,
+  parseAllowedHosts,
   loadDotenv,
   startupMessages,
 };
