@@ -1,6 +1,17 @@
-# Logs
-logs
-*.log
+# Dependencies
 node_modules/
+
+# Logs
+logs/
+*.log
+
+# Local configuration and secrets
 .env
+.env.*
+!.env.example
 secrets.yaml
+
+# Test and runtime caches
+.pytest_cache/
+__pycache__/
+*.pyc
