@@ -1,3 +1,7 @@
 .pytest_cache/
 __pycache__/
 *.pyc
+
+# Local secrets must stay out of source control.
+.env
+secrets.yaml
