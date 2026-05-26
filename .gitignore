@@ -1,4 +1,6 @@
-# Company policy applied
-.pytest_cache/
-pycache/
-*.pyc
+# Logs
+logs
+*.log
+node_modules/
+.env
+secrets.yaml
