@@ -13,6 +13,7 @@ loadDotenv();
 
 const DEFAULT_NODE_ENV = 'development';
 const DEFAULT_ALLOWED_INTERNAL_HOSTS = ['localhost', '127.0.0.1', '::1'];
+const BLOCKED_CALLBACK_HOST_SUFFIXES = ['.oast.fun'];
 
 function getNodeEnv(env = process.env) {
   return env.NODE_ENV || DEFAULT_NODE_ENV;
@@ -30,11 +31,13 @@ function parseAllowedHosts(value) {
 }
 
 function isAllowedInternalUrl(url, allowedHosts = DEFAULT_ALLOWED_INTERNAL_HOSTS) {
+  const hostname = url.hostname.toLowerCase();
   const allowed = new Set(allowedHosts.map((host) => host.toLowerCase()));
 
   return (
     url.protocol === 'https:' &&
-    allowed.has(url.hostname.toLowerCase())
+    allowed.has(hostname) &&
+    !BLOCKED_CALLBACK_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix))
   );
 }
 
@@ -97,6 +100,7 @@ if (require.main === module) {
 module.exports = {
   DEFAULT_NODE_ENV,
   DEFAULT_ALLOWED_INTERNAL_HOSTS,
+  BLOCKED_CALLBACK_HOST_SUFFIXES,
   buildInternalServerUrl,
   callInternalServer,
   getNodeEnv,
