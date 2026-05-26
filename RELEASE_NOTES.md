@@ -20,7 +20,7 @@
 ### Testing
 
 - Added Node test coverage for environment defaults, startup output, allowlist parsing, URL construction, host rejection, and internal request handling.
-- Added regression coverage for callback hosts that appear in the allowlist, including the reopened issue callback host case.
+- Added regression coverage for callback hosts that appear in the allowlist.
 
 ### Maintenance
 
